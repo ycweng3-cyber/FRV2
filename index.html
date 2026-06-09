@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【未來許願機】新生的未來狂想曲</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Noto Sans TC', sans-serif;
+            /* 1. 改為舒適的晴空藍天漸層底色 */
+            background: linear-gradient(to bottom, #7ec0ee, #abe1fa); 
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 380px; /* 稍微加高，讓雲朵由下往上飄移的視覺空間更美 */
+        }
+
+        .barrage-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* 2. 打造不規則形狀、稍微不透明的純白雲朵泡泡 */
+        .wish-cloud {
+            position: absolute;
+            white-space: nowrap;
+            font-weight: bold;
+            font-size: 1.05rem;
+            padding: 12px 22px;
+            
+            /* 運用不規則圓角（Blob）營造輕柔的雲朵感 */
+            background: rgba(255, 255, 255, 0.85); 
+            border-radius: 40% 60% 50% 50% / 40% 40% 60% 60%;
+            
+            box-shadow: 0 6px 15px rgba(120, 160, 200, 0.2);
+            user-select: none;
+            cursor: default;
+            display: inline-block;
+            will-change: transform; /* 優化瀏覽器渲染性能，防止抖動 */
+            
+            /* 由下往上的平滑動畫 */
+            animation: moveUp linear infinite;
+        }
+
+        /* 輕微的雲朵左右晃動效果，讓漂浮更自然 */
+        @keyframes moveUp {
+            0% {
+                transform: translateY(400px) translateX(0);
+            }
+            50% {
+                transform: translateY(180px) translateX(10px); /* 飄到一半往右擺動一點 */
+            }
+            100% {
+                transform: translateY(-100px) translateX(-5px); /* 飄出頂端 */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="barrage-container" id="barrage-box"></div>
+
+    <script>
+        // ===================================================================
+        // ✨ 策展人專區：未來如果想更新願望，直接修改或新增下方引號【 】裡面的中文即可！
+        // ===================================================================
+        const wishList = [
+            "✨ 微積分一定要歐趴！",
+            "🚀 畢業前拿到竹科聯發科實習！",
+            "🥰 希望能在清大交到男女朋友",
+            "📚 碩士論文順利兩年過關！",
+            "🚴 挑戰清大校園好漢坡成功",
+            "🎨 參加一次圖書館的文青策展",
+            "🔥 成功湖整治好了！一定要去划船！",
+            "🌟 成為多才多藝的斜槓青年",
+            "🍔 吃遍新竹所有隱藏版美食綠洲",
+            "🎸 加入吉他社，在梅竹賽舞台上表演",
+            "💡 每天都有睡飽 8 小時再上課",
+            "🏆 拿到書卷獎！讓爸媽驕傲一下",
+            "🌊 暑假想去沖繩畢業旅行！",
+            "💻 學好 Logic Pro，產出我的狂想曲"
+        ];
+
+        // 🎨 適合藍天背景的繽紛輕柔粉嫩系字體顏色
+        const fontColors = [
+            "#D84315", // 1. 溫暖溫柔的焙茶橘
+            "#00838F", // 2. 莫蘭迪深粉藍
+            "#4A148C", // 3. 內斂文青深紫
+            "#2E7D32", // 4. 森林粉綠
+            "#C2185B"  // 5. 輕柔玫瑰紅
+        ];
+
+        const container = document.getElementById('barrage-box');
+        
+        // 3. 軌道制防重疊演算法
+        // 將畫面水平切分成 4 個獨立的縱向「軌道」，泡泡各自在軌道內向上爬，絕不互撞
+        const numTracks = 4;
+        const trackWidthPercentage = 100 / numTracks;
+        
+        // 紀錄每個軌道上最後一個泡泡出發的時間，確保前後維持安全社交距離
+        const trackLastReleaseTime = new Array(numTracks).fill(0);
+
+        function createClouds() {
+            wishList.forEach((wish, index) => {
+                // 為每個願望安排出發順序，利用隨機延遲錯開時間
+                const delay = index * 2200; 
+
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = 'wish-cloud';
+                    div.innerText = wish;
+
+                    // 找出目前最空閒或隨機一個軌道
+                    const trackIndex = index % numTracks;
+                    
+                    // 計算該軌道的左邊距位置，並在軌道內做微幅置中隨機位移
+                    const leftPosition = (trackIndex * trackWidthPercentage) + (Math.random() * 5);
+                    div.style.left = `${leftPosition}%`;
+
+                    // 隨機套用輕柔的文字顏色
+                    div.style.color = fontColors[Math.floor(Math.random() * fontColors.length)];
+
+                    // 隨機賦予每朵雲不規則的形狀變化
+                    const r1 = Math.floor(Math.random() * 20) + 35;
+                    const r2 = Math.floor(Math.random() * 20) + 45;
+                    const r3 = Math.floor(Math.random() * 20) + 45;
+                    const r4 = Math.floor(Math.random() * 20) + 45;
+                    div.style.borderRadius = `${r1}% ${100-r1}% ${r2}% ${100-r2}% / ${r3}% ${r4}% ${100-r4}% ${100-r3}%`;
+
+                    // 隨機設定上升速度（16秒 ~ 23秒），創造前後錯落、高低起伏的層次感
+                    const duration = 16 + (Math.random() * 7);
+                    div.style.animationDuration = `${duration}s`;
+
+                    container.appendChild(div);
+
+                    // 當這朵雲飄完頂端後，自動重新洗牌它的顏色與形狀，無限流暢循環
+                    div.addEventListener('animationiteration', () => {
+                        div.style.color = fontColors[Math.floor(Math.random() * fontColors.length)];
+                        const rx1 = Math.floor(Math.random() * 20) + 35;
+                        const rx2 = Math.floor(Math.random() * 20) + 45;
+                        div.style.borderRadius = `${rx1}% ${100-rx1}% ${rx2}% ${100-rx2}% / ${rx1}% ${rx2}% ${100-rx2}% ${100-rx1}%`;
+                    });
+
+                }, delay);
+            });
+        }
+
+        // 啟動許願機
+        createClouds();
+    </script>
+</body>
+</html>
